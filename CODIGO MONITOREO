@@ -1,0 +1,23 @@
+tiempo=5
+inter=60
+iter=$((tiempo * 60 / inter))
+datos="DATOS.txt"
+printf "Tiempo\t\tTotal_de_CPU_Libre\tMemoria_Libre\tDisco_Libre\n" > "$datos"
+echo "Espere......"
+contador=0
+
+for ((i=1; i<=iter; i++))
+do
+    contador=$((i * inter))
+    CPU=$(top -b -n 1 | grep "Cpu(s)" | awk '{print $8}' | sed 's/,/./')
+    memoriat=$(free | awk '/^Mem/ {print $2}')
+    memorial=$(free | awk '/^Mem/ {print $4}')
+    memoriap=$(awk "BEGIN {printf \"%.2f\", ($memorial / $memoriat) * 100}")
+    discot=$(df / | awk 'NR==2 {print $2}' | sed 's/G//')
+    discol=$(df / | awk 'NR==2 {print $4}' | sed 's/G//')
+    discop=$(awk "BEGIN {printf \"%.2f\", ($discol / $discot) * 100}")
+    printf "%ss\t\t%s%%\t\t%s%%\t\t%s%%\n" "$contador" "$CPU" "$memoriap" "$discop" >> "$datos"
+    sleep $inter
+done
+
+echo "TERMINADO.... EJECUTE CAT DATOS.txt"
